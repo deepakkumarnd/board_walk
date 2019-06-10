@@ -6,7 +6,7 @@ module BoardWalk
 
     let(:board) { Board.new(10) }
 
-    subject { Pawn.new(board, 0, 0) }
+    subject { Pawn.new(board, 0, 5) }
 
     it 'can initialize a cell' do
       expect(subject).to be_truthy

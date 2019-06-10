@@ -1,3 +1,5 @@
+require 'pry'
+
 module BoardWalk
 
   class Pawn
@@ -17,7 +19,7 @@ module BoardWalk
 
     def initialize(board, initial_x, intial_y)
       @board = board
-      raise OutOfBoardError if !@board.within_boundary?(initial_x, intial_y)
+      raise OutOfBoardError if !@board.within_board?(initial_x, intial_y)
       @start_cell   = @board.cell(initial_x, intial_y)
       @path = []
     end
@@ -28,15 +30,16 @@ module BoardWalk
       @path.push(@current_cell)
 
       loop do
-        move = find_best_move
+        next_cell = find_best_move
 
-        if move.nil?
-          if @path.length == @board.cell_count
+        if next_cell.nil?
+          if all_cells_visited?
             print_path
             break
           else
-            @path.pop
-            # c.unvisit! if c
+            # binding.pry
+            c  = @path.pop
+            c.unvisit! if c
             @current_cell = @path.pop
             if @current_cell.nil?
               puts "Can't find full path starting with #{@start_cell.address}"
@@ -44,18 +47,21 @@ module BoardWalk
             end
           end
         else
-          jump_to(move)
+          visit(next_cell)
         end
       end
     end
 
-    def find_best_move
-      valid_moves(@current_cell)
-        .sort_by { |cell| score(cell) }
-        .first
+    def all_cells_visited?
+      (@path.length == @board.cell_count) && @board.full?
     end
 
-    def jump_to(cell)
+    def find_best_move
+      valid_moves(@current_cell)
+        .min_by { |cell| score(cell) }
+    end
+
+    def visit(cell)
       raise CellAlreadyVistedError if cell.visited?
       raise CellAlreadyVistedError if @path.include?(cell)
       @current_cell = cell
@@ -90,7 +96,7 @@ module BoardWalk
     end
 
     def valid_cell_position?(x, y)
-      @board.within_boundary?(x, y)
+      @board.within_board?(x, y)
     end
   end
 end

@@ -9,7 +9,7 @@ module BoardWalk
     end
 
     def cell(x, y)
-      raise BoardWalk::OutOfBoardError if !within_boundary?(x, y)
+      raise BoardWalk::OutOfBoardError if !within_board?(x, y)
       @board[x][y]
     end
 
@@ -17,8 +17,22 @@ module BoardWalk
       @printer.new(@board).to_s
     end
 
-    def within_boundary?(x, y)
+    def within_board?(x, y)
       (0...@size).include?(x) && (0...@size).include?(y)
+    end
+
+    def cell_count
+      @cell_count ||= @size * @size
+    end
+
+    def full?
+      @board.each do |row|
+        row.each do |cell|
+          return false unless cell.visited?
+        end
+      end
+
+      true
     end
 
     private
